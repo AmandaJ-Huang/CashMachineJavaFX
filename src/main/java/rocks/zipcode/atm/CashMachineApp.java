@@ -10,7 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.control.Alert.*;
+import javafx.fxml.FXMLLoader; //load an FXML file and create the GUI components
+import javafx.scene.control.Alert;
 
 /**
  * @author ZipCodeWilmington
@@ -22,9 +23,12 @@ public class CashMachineApp extends Application {
 
     private Parent createContent() {
         VBox vbox = new VBox(10);
-        vbox.setPrefSize(600, 600);
+        vbox.setPrefSize(600, 300);
 
         TextArea areaInfo = new TextArea();
+        //Info boxes displayed in TextAreas
+//        TextArea idInfo = new TextArea();
+//        TextArea depositInfo = new TextArea();
 
         Button btnSubmit = new Button("Set Account ID");
         btnSubmit.setOnAction(e -> {
@@ -36,7 +40,7 @@ public class CashMachineApp extends Application {
 
         Button btnDeposit = new Button("Deposit");
         btnDeposit.setOnAction(e -> {
-            int amount = Integer.parseInt(field.getText());
+            Float amount = Float.parseFloat(field.getText());
             cashMachine.deposit(amount);
 
             areaInfo.setText(cashMachine.toString());
@@ -44,7 +48,7 @@ public class CashMachineApp extends Application {
 
         Button btnWithdraw = new Button("Withdraw");
         btnWithdraw.setOnAction(e -> {
-            int amount = Integer.parseInt(field.getText());
+            Float amount = Float.parseFloat(field.getText());
             cashMachine.withdraw(amount);
 
             areaInfo.setText(cashMachine.toString());
@@ -70,6 +74,8 @@ public class CashMachineApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setScene(new Scene(createContent()));
+        stage.setTitle("ZipCodeBank"); //sets the title of the scene
+
         stage.show();
     }
 
