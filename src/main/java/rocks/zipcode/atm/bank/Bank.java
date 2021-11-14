@@ -26,6 +26,8 @@ public class Bank {
         accounts.put(3000, new BasicAccount(new AccountData(
                 3000, "newAcct1", "newAcct1@gmail.com", 50
         )));
+
+        addNewPremiumAccount(1234, "Dr. Evil", "drevil@villains.com", 1000000F);
     }
 
     public void addNewBasicAccount(int id, String name, String email, Float balance) {

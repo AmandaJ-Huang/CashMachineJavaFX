@@ -24,10 +24,6 @@ public class CashMachineApp extends Application {
     private TextField idField = new TextField();
     private TextField depositWithdrawField = new TextField();
     private Text welcomeTitle = new Text("Welcome to ZipCodeBank's ATM.");
-    private TextField newLoginID = new TextField();
-    private TextField newName = new TextField();
-    private TextField newBalance = new TextField();
-    private TextField newEmail = new TextField();
 
     private CashMachine cashMachine = new CashMachine(new Bank());
 
@@ -36,19 +32,28 @@ public class CashMachineApp extends Application {
     private Button btnWithdraw = new Button("Withdraw");
     private Button btnExit = new Button("Logout");
     private Button btnRegister = new Button("Register");
-    private Button btnYes = new Button("Yes");
-    private Button btnNo = new Button("No");
 
     private Menu accountMenu = new Menu("Account Listing");
     private MenuBar menuBar = new MenuBar();
 
-    private GridPane grid = new GridPane();
+    //for formLayout GridPane
+    private GridPane formGrid = new GridPane();
+    private TextField newLoginID = new TextField();
+    private TextField newName = new TextField();
+    private TextField newBalance = new TextField();
+    private TextField newEmail = new TextField();
+    private RadioButton basicAccountRadio = new RadioButton("Basic");
+    private RadioButton premiumAccountRadio = new RadioButton("Premium");
+    private ToggleGroup accountSelectionGroup = new ToggleGroup();
 
     private Parent createContent() {
         VBox vbox = new VBox(10);
         vbox.setPrefSize(500, 500);
 
+        registerFormLayout();
+
         //Account listing via menu
+        menuBar.getMenus().add(accountMenu);
         accountListingMenu();
 
         TextArea areaInfo = new TextArea();
@@ -60,33 +65,34 @@ public class CashMachineApp extends Application {
             if (accountExists){
                 int id = Integer.parseInt(idField.getText());
                 cashMachine.login(id);
-                newLoginID.setText(cashMachine.toString());
+                areaInfo.setText(cashMachine.toString());
                 enableDisableButtons("off");
             }
         });
 
         btnRegister.setOnAction(e -> {
             registerNewAccount();
+            accountListingMenu();
                 });
 
         btnDeposit.setOnAction(e -> {
             Float amount = Float.parseFloat(depositWithdrawField.getText());
             cashMachine.deposit(amount);
 
-            //areaInfo.setText(cashMachine.toString());
+            areaInfo.setText(cashMachine.toString());
         });
 
         btnWithdraw.setOnAction(e -> {
             Float amount = Float.parseFloat(depositWithdrawField.getText());
             cashMachine.withdraw(amount);
 
-            //areaInfo.setText(cashMachine.toString());
+            areaInfo.setText(cashMachine.toString());
         });
 
         btnExit.setOnAction(e -> {
             cashMachine.exit();
 
-            areaInfo.setText(cashMachine.toString());
+            areaInfo.clear();
             enableDisableButtons("on");
         });
 
@@ -98,7 +104,6 @@ public class CashMachineApp extends Application {
         FlowPane depositAndWithdrawalPane = new FlowPane(10, 0, depositWithdrawField, btnDeposit, btnWithdraw);
         depositAndWithdrawalPane.setAlignment(Pos.CENTER_LEFT);
 
-
         //Formatting
         idField.setPromptText("Enter ID number.");
         depositWithdrawField.setPromptText("Enter amount to deposit or withdraw.");
@@ -107,7 +112,7 @@ public class CashMachineApp extends Application {
         //vbox.setAlignment(Pos.CENTER);
         VBox.setMargin(welcomeTitle, new Insets(5, 20, 0, 20));
         VBox.setMargin(depositAndWithdrawalPane, new Insets(0, 20, 0, 20));
-        vbox.getChildren().addAll(menuBar, welcomeTitle, loginPane, depositAndWithdrawalPane, btnExit);
+        vbox.getChildren().addAll(menuBar, welcomeTitle, loginPane, depositAndWithdrawalPane, areaInfo, btnExit);
 
         return vbox;
     }
@@ -117,25 +122,38 @@ public class CashMachineApp extends Application {
 
         if (input.getText().isEmpty()) {
             loginWarning.setTitle("Login Warning: No ID");
-            loginWarning.setHeaderText("You have not entered an account ID."
-                    + '\n' + "Please try again.");
+            loginWarning.setHeaderText("No ID Provided");
+            loginWarning.setContentText("You have not entered an account ID."
+                    + '\n' + "Please check the account listing and try again.");
             loginWarning.showAndWait();
             return false;
         }
-        for(Integer account: cashMachine.listAccounts()){
-            if (account.equals(Integer.parseInt(input.getText()))) {
-                return true;
+        try{
+            for(Integer account: cashMachine.listAccounts()){
+                if (account.equals(Integer.parseInt(input.getText()))) {
+                    return true;
+                }
             }
-        }
+        } catch (Exception e) {
+            loginWarning.setTitle("Login Warning: Invalid ID");
+            loginWarning.setHeaderText("Invalid ID Provided");
+            loginWarning.setContentText("You have entered an invalid account ID."
+                    + '\n' + "Please try again or register a new account.");
+            loginWarning.showAndWait();
+            return false;
+        };
         loginWarning.setTitle("Login Warning: Invalid ID");
-        loginWarning.setHeaderText("You have entered an invalid account ID."
-                + '\n' + "Please try again.");
+        loginWarning.setHeaderText("Invalid ID Provided");
+        loginWarning.setContentText("You have entered an invalid account ID."
+                + '\n' + "Please try again or register a new account.");
         loginWarning.showAndWait();
         return false;
     }
 
     private void accountListingMenu() {
-        menuBar.getMenus().add(accountMenu);
+        if(!accountMenu.getItems().isEmpty()){
+            accountMenu.getItems().clear();
+        }
         for(Integer account : cashMachine.listAccounts()) {
             MenuItem addAccount = new MenuItem(account.toString());
             accountMenu.getItems().add(addAccount);
@@ -148,6 +166,7 @@ public class CashMachineApp extends Application {
             btnWithdraw.setDisable(true);
             btnExit.setDisable(true);
             btnLogin.setDisable(false);
+            btnRegister.setDisable((false));
 
             idField.setDisable(false);
             depositWithdrawField.setDisable(true);
@@ -156,6 +175,7 @@ public class CashMachineApp extends Application {
             btnWithdraw.setDisable(false);
             btnExit.setDisable(false);
             btnLogin.setDisable(true);
+            btnRegister.setDisable(true);
 
             idField.setDisable(true);
             depositWithdrawField.setDisable(false);
@@ -164,40 +184,63 @@ public class CashMachineApp extends Application {
 
     private void registerNewAccount() {
         Dialog dialog = new Dialog();
-        TextInputDialog registrationForm = new TextInputDialog();
 
         dialog.setTitle("Register New Account");
         dialog.setHeaderText("Please fill out the form to register " +
                 "a new account with ZipCodeBank.");
 
-        formLayout(dialog);
-        dialog.show();
+        dialog.getDialogPane().setContent(formGrid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.FINISH);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(result -> {
+            if (result == ButtonType.FINISH) {
+                int registeredLoginID = Integer.parseInt(newLoginID.getText());
+                String registeredName = newName.getText();
+                String registeredEmail = newEmail.getText();
+                Float registeredBalance = Float.parseFloat(newBalance.getText());
+
+                cashMachine.addBasicAccount(registeredLoginID, registeredName, registeredEmail, registeredBalance);
+                newLoginID.clear();
+                newName.clear();
+                newEmail.clear();
+                newBalance.clear();
+            }
+        });
+
     }
 
-    private void formLayout(Dialog dialog) {
-        grid.setAlignment(Pos.CENTER_LEFT);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 20, 20, 20));
+    private void registerFormLayout() {
+        formGrid.setAlignment(Pos.CENTER);
+        formGrid.setHgap(10);
+        formGrid.setVgap(10);
+        formGrid.setPadding(new Insets(20, 20, 20, 20));
 
         //labels to indicate corresponding data fields
-        Label loginIDLabel = new Label("Enter login ID: ");
-        Label nameLabel = new Label("Enter name: ");
-        Label emailLabel = new Label("Enter email: ");
-        Label balanceLabel = new Label("Initial deposit: ");
+        Label loginIDLabel = new Label("Enter Login ID: ");
+        Label nameLabel = new Label("Enter Name: ");
+        Label emailLabel = new Label("Enter Email: ");
+        Label balanceLabel = new Label("Initial Deposit: ");
+        Label selectAccountType = new Label("Select Account Type: ");
 
-        //grid layout
-        grid.add(loginIDLabel, 0, 1);
-        grid.add(nameLabel, 0, 2);
-        grid.add(emailLabel, 0, 3);
-        grid.add(balanceLabel, 0, 4);
+        //formGrid layout
+        formGrid.add(selectAccountType, 1, 1);
+        formGrid.add(loginIDLabel, 1, 3);
+        formGrid.add(nameLabel, 1, 4);
+        formGrid.add(emailLabel, 1, 5);
+        formGrid.add(balanceLabel, 1, 6);
 
-        grid.add(newLoginID, 1, 1);
-        grid.add(newName, 1, 2);
-        grid.add(newEmail, 1, 3);
-        grid.add(newBalance, 1, 4);
+        newLoginID.setPromptText("example: 007");
+        newName.setPromptText("example: James Bond");
+        newEmail.setPromptText("example@email.com");
+        newBalance.setPromptText("example: 500");
 
-        dialog.getDialogPane().setContent(grid);
+        formGrid.add(basicAccountRadio, 2, 1);
+        formGrid.add(premiumAccountRadio, 2, 2);
+        formGrid.add(newLoginID, 2, 3);
+        formGrid.add(newName, 2, 4);
+        formGrid.add(newEmail, 2, 5);
+        formGrid.add(newBalance, 2, 6);
     }
 
     @Override

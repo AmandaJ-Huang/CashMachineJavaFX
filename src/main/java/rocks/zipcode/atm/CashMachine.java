@@ -27,6 +27,10 @@ public class CashMachine {
         return bank.bankAccount();
     }
 
+    public void addBasicAccount(int id, String name, String email, Float balance) {
+        bank.addNewBasicAccount(id, name, email, balance);
+    }
+
     public void login(int id) {
         tryCall(
                 () -> bank.getAccountById(id),
@@ -60,7 +64,7 @@ public class CashMachine {
 
     @Override
     public String toString() {
-        return accountData != null ? accountData.toString() : "Invalid Account";
+        return accountData != null ? accountData.toString() : null;
     }
 
     private <T> void tryCall(Supplier<ActionResult<T> > action, Consumer<T> postAction) {
