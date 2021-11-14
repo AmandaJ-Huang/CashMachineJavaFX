@@ -31,6 +31,10 @@ public class CashMachine {
         bank.addNewBasicAccount(id, name, email, balance);
     }
 
+    public void addPremiumAccount(int id, String name, String email, Float balance) {
+        bank.addNewPremiumAccount(id, name, email, balance);
+    }
+
     public void login(int id) {
         tryCall(
                 () -> bank.getAccountById(id),

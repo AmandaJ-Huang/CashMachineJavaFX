@@ -49,14 +49,16 @@ public class CashMachineApp extends Application {
     private Parent createContent() {
         VBox vbox = new VBox(10);
         vbox.setPrefSize(500, 500);
+        TextArea areaInfo = new TextArea();
 
+        //Register form formatting
         registerFormLayout();
+        basicAccountRadio.setToggleGroup(accountSelectionGroup);
+        premiumAccountRadio.setToggleGroup(accountSelectionGroup);
 
         //Account listing via menu
         menuBar.getMenus().add(accountMenu);
         accountListingMenu();
-
-        TextArea areaInfo = new TextArea();
 
         //Button actions for Login, Deposit, Withdraw, Logout
         enableDisableButtons("on");
@@ -97,12 +99,14 @@ public class CashMachineApp extends Application {
         });
 
 
-        //FlowPanes - id, deposit, withdraw
+        //FlowPanes - id, deposit, withdraw, account detail
         FlowPane loginPane = new FlowPane(10, 0, idField, btnLogin, btnRegister);
         loginPane.setAlignment(Pos.CENTER);
 
         FlowPane depositAndWithdrawalPane = new FlowPane(10, 0, depositWithdrawField, btnDeposit, btnWithdraw);
         depositAndWithdrawalPane.setAlignment(Pos.CENTER_LEFT);
+
+        FlowPane accountDetailVertical = new FlowPane();
 
         //Formatting
         idField.setPromptText("Enter ID number.");
@@ -200,11 +204,22 @@ public class CashMachineApp extends Application {
                 String registeredEmail = newEmail.getText();
                 Float registeredBalance = Float.parseFloat(newBalance.getText());
 
-                cashMachine.addBasicAccount(registeredLoginID, registeredName, registeredEmail, registeredBalance);
-                newLoginID.clear();
-                newName.clear();
-                newEmail.clear();
-                newBalance.clear();
+                if (accountSelectionGroup.getSelectedToggle().equals(basicAccountRadio)) {
+                    cashMachine.addBasicAccount(registeredLoginID, registeredName, registeredEmail, registeredBalance);
+                    newLoginID.clear();
+                    newName.clear();
+                    newEmail.clear();
+                    newBalance.clear();
+                }
+
+                if (accountSelectionGroup.getSelectedToggle().equals(premiumAccountRadio)) {
+                    cashMachine.addPremiumAccount(registeredLoginID, registeredName, registeredEmail, registeredBalance);
+                    newLoginID.clear();
+                    newName.clear();
+                    newEmail.clear();
+                    newBalance.clear();
+
+                }
             }
         });
 
