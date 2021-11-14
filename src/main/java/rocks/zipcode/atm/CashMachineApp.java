@@ -1,6 +1,5 @@
 package rocks.zipcode.atm;
 
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -17,8 +16,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.text.Text;
 import javafx.scene.control.Menu;
 
-import java.util.Locale;
-
 /**
  * @author ZipCodeWilmington
  */
@@ -27,9 +24,10 @@ public class CashMachineApp extends Application {
     private TextField idField = new TextField();
     private TextField depositWithdrawField = new TextField();
     private Text welcomeTitle = new Text("Welcome to ZipCodeBank's ATM.");
-    private TextField loginInfo = new TextField();
-    private TextField balanceInfo = new TextField();
-    private TextField emailInfo = new TextField();
+    private TextField newLoginID = new TextField();
+    private TextField newName = new TextField();
+    private TextField newBalance = new TextField();
+    private TextField newEmail = new TextField();
 
     private CashMachine cashMachine = new CashMachine(new Bank());
 
@@ -38,6 +36,8 @@ public class CashMachineApp extends Application {
     private Button btnWithdraw = new Button("Withdraw");
     private Button btnExit = new Button("Logout");
     private Button btnRegister = new Button("Register");
+    private Button btnYes = new Button("Yes");
+    private Button btnNo = new Button("No");
 
     private Menu accountMenu = new Menu("Account Listing");
     private MenuBar menuBar = new MenuBar();
@@ -56,17 +56,17 @@ public class CashMachineApp extends Application {
         //Button actions for Login, Deposit, Withdraw, Logout
         enableDisableButtons("on");
         btnLogin.setOnAction(e -> {
-            loginWarning(idField);
-
-            int id = Integer.parseInt(idField.getText());
-            cashMachine.login(id);
-
-            loginInfo.setText(cashMachine.toString());
-            enableDisableButtons("off");
+            Boolean accountExists = loginWarning(idField);
+            if (accountExists){
+                int id = Integer.parseInt(idField.getText());
+                cashMachine.login(id);
+                newLoginID.setText(cashMachine.toString());
+                enableDisableButtons("off");
+            }
         });
 
         btnRegister.setOnAction(e -> {
-
+            registerNewAccount();
                 });
 
         btnDeposit.setOnAction(e -> {
@@ -90,11 +90,9 @@ public class CashMachineApp extends Application {
             enableDisableButtons("on");
         });
 
-        //Set form layout
-        formLayout();
 
         //FlowPanes - id, deposit, withdraw
-        FlowPane loginPane = new FlowPane(10, 0, idField, btnLogin);
+        FlowPane loginPane = new FlowPane(10, 0, idField, btnLogin, btnRegister);
         loginPane.setAlignment(Pos.CENTER);
 
         FlowPane depositAndWithdrawalPane = new FlowPane(10, 0, depositWithdrawField, btnDeposit, btnWithdraw);
@@ -109,12 +107,12 @@ public class CashMachineApp extends Application {
         //vbox.setAlignment(Pos.CENTER);
         VBox.setMargin(welcomeTitle, new Insets(5, 20, 0, 20));
         VBox.setMargin(depositAndWithdrawalPane, new Insets(0, 20, 0, 20));
-        vbox.getChildren().addAll(menuBar, welcomeTitle, loginPane, depositAndWithdrawalPane, grid, btnExit);
+        vbox.getChildren().addAll(menuBar, welcomeTitle, loginPane, depositAndWithdrawalPane, btnExit);
 
         return vbox;
     }
 
-    private void loginWarning(TextField input) {
+    private Boolean loginWarning(TextField input) {
         Alert loginWarning = new Alert(Alert.AlertType.WARNING);
 
         if (input.getText().isEmpty()) {
@@ -122,21 +120,18 @@ public class CashMachineApp extends Application {
             loginWarning.setHeaderText("You have not entered an account ID."
                     + '\n' + "Please try again.");
             loginWarning.showAndWait();
-
-        } else if (false){
-            loginWarning.setTitle("Login Warning: Invalid ID");
-            loginWarning.setHeaderText("You have entered an invalid account ID."
-                    + '\n' + "Please try again.");
-            loginWarning.showAndWait();
+            return false;
         }
-    }
-
-    private void registerNewAccount() {
-        Dialog dialog = new Dialog();
-        TextInputDialog registrationForm = new TextInputDialog();
-
-        dialog.setTitle("Register New Account");
-        dialog.setHeaderText("");
+        for(Integer account: cashMachine.listAccounts()){
+            if (account.equals(Integer.parseInt(input.getText()))) {
+                return true;
+            }
+        }
+        loginWarning.setTitle("Login Warning: Invalid ID");
+        loginWarning.setHeaderText("You have entered an invalid account ID."
+                + '\n' + "Please try again.");
+        loginWarning.showAndWait();
+        return false;
     }
 
     private void accountListingMenu() {
@@ -167,34 +162,42 @@ public class CashMachineApp extends Application {
         }
     }
 
-    private void formLayout() {
+    private void registerNewAccount() {
+        Dialog dialog = new Dialog();
+        TextInputDialog registrationForm = new TextInputDialog();
+
+        dialog.setTitle("Register New Account");
+        dialog.setHeaderText("Please fill out the form to register " +
+                "a new account with ZipCodeBank.");
+
+        formLayout(dialog);
+        dialog.show();
+    }
+
+    private void formLayout(Dialog dialog) {
         grid.setAlignment(Pos.CENTER_LEFT);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 20, 20, 20));
 
         //labels to indicate corresponding data fields
-        Label loginIDLabel = new Label("Login ID: ");
-        Label emailLabel = new Label("Email: ");
-        Label balanceLabel = new Label("Balance: ");
+        Label loginIDLabel = new Label("Enter login ID: ");
+        Label nameLabel = new Label("Enter name: ");
+        Label emailLabel = new Label("Enter email: ");
+        Label balanceLabel = new Label("Initial deposit: ");
 
         //grid layout
         grid.add(loginIDLabel, 0, 1);
-        grid.add(emailLabel, 0, 2);
-        grid.add(balanceLabel, 0, 3);
+        grid.add(nameLabel, 0, 2);
+        grid.add(emailLabel, 0, 3);
+        grid.add(balanceLabel, 0, 4);
 
-        loginInfo.setDisable(true);
-        loginInfo.setOpacity(0.65);
+        grid.add(newLoginID, 1, 1);
+        grid.add(newName, 1, 2);
+        grid.add(newEmail, 1, 3);
+        grid.add(newBalance, 1, 4);
 
-        emailInfo.setDisable(true);
-        emailInfo.setOpacity(0.65);
-
-        balanceInfo.setDisable(true);
-        balanceInfo.setOpacity(0.65);
-
-        grid.add(loginInfo, 1, 1);
-        grid.add(emailInfo, 1, 2);
-        grid.add(balanceInfo, 1, 3);
+        dialog.getDialogPane().setContent(grid);
     }
 
     @Override

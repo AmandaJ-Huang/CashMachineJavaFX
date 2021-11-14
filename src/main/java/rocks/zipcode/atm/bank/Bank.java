@@ -5,13 +5,14 @@ import rocks.zipcode.atm.ActionResult;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * @author ZipCodeWilmington
  */
 public class Bank {
 
-    private Map<Integer, Account> accounts = new HashMap<>();
+    private Map<Integer, Account> accounts = new TreeMap<>();
 
     public Bank() {
         accounts.put(1000, new BasicAccount(new AccountData(
