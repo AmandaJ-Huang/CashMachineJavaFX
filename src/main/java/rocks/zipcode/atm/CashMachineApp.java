@@ -1,5 +1,6 @@
 package rocks.zipcode.atm;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -36,17 +37,19 @@ public class CashMachineApp extends Application {
     private Button btnDeposit = new Button("Deposit");
     private Button btnWithdraw = new Button("Withdraw");
     private Button btnExit = new Button("Logout");
+    private Button btnRegister = new Button("Register");
 
-    private Menu accountList = new Menu("Account Listing");
+    private Menu accountMenu = new Menu("Account Listing");
+    private MenuBar menuBar = new MenuBar();
 
     private GridPane grid = new GridPane();
 
     private Parent createContent() {
         VBox vbox = new VBox(10);
-        vbox.setPrefSize(500, 300);
+        vbox.setPrefSize(500, 500);
 
-        MenuBar menuBar = new MenuBar();
-        menuBar.getMenus().add(accountList);
+        //Account listing via menu
+        accountListingMenu();
 
         TextArea areaInfo = new TextArea();
 
@@ -61,6 +64,10 @@ public class CashMachineApp extends Application {
             loginInfo.setText(cashMachine.toString());
             enableDisableButtons("off");
         });
+
+        btnRegister.setOnAction(e -> {
+
+                });
 
         btnDeposit.setOnAction(e -> {
             Float amount = Float.parseFloat(depositWithdrawField.getText());
@@ -91,13 +98,15 @@ public class CashMachineApp extends Application {
         loginPane.setAlignment(Pos.CENTER);
 
         FlowPane depositAndWithdrawalPane = new FlowPane(10, 0, depositWithdrawField, btnDeposit, btnWithdraw);
+        depositAndWithdrawalPane.setAlignment(Pos.CENTER_LEFT);
+
 
         //Formatting
         idField.setPromptText("Enter ID number.");
         depositWithdrawField.setPromptText("Enter amount to deposit or withdraw.");
         welcomeTitle.setFont(Font.font("Helvetica", FontWeight.MEDIUM, 15));
 
-        vbox.setAlignment(Pos.CENTER);
+        //vbox.setAlignment(Pos.CENTER);
         VBox.setMargin(welcomeTitle, new Insets(5, 20, 0, 20));
         VBox.setMargin(depositAndWithdrawalPane, new Insets(0, 20, 0, 20));
         vbox.getChildren().addAll(menuBar, welcomeTitle, loginPane, depositAndWithdrawalPane, grid, btnExit);
@@ -108,17 +117,33 @@ public class CashMachineApp extends Application {
     private void loginWarning(TextField input) {
         Alert loginWarning = new Alert(Alert.AlertType.WARNING);
 
-        if (input.getText().equals("")) {
-            loginWarning.setTitle("Login Warning");
-            loginWarning.setHeaderText("You have not entered a login ID."
+        if (input.getText().isEmpty()) {
+            loginWarning.setTitle("Login Warning: No ID");
+            loginWarning.setHeaderText("You have not entered an account ID."
                     + '\n' + "Please try again.");
             loginWarning.showAndWait();
 
         } else if (false){
-            loginWarning.setTitle("Login Warning");
-            loginWarning.setHeaderText("You have entered an invalid login ID."
+            loginWarning.setTitle("Login Warning: Invalid ID");
+            loginWarning.setHeaderText("You have entered an invalid account ID."
                     + '\n' + "Please try again.");
             loginWarning.showAndWait();
+        }
+    }
+
+    private void registerNewAccount() {
+        Dialog dialog = new Dialog();
+        TextInputDialog registrationForm = new TextInputDialog();
+
+        dialog.setTitle("Register New Account");
+        dialog.setHeaderText("");
+    }
+
+    private void accountListingMenu() {
+        menuBar.getMenus().add(accountMenu);
+        for(Integer account : cashMachine.listAccounts()) {
+            MenuItem addAccount = new MenuItem(account.toString());
+            accountMenu.getItems().add(addAccount);
         }
     }
 
@@ -128,11 +153,17 @@ public class CashMachineApp extends Application {
             btnWithdraw.setDisable(true);
             btnExit.setDisable(true);
             btnLogin.setDisable(false);
+
+            idField.setDisable(false);
+            depositWithdrawField.setDisable(true);
         } else {
             btnDeposit.setDisable(false);
             btnWithdraw.setDisable(false);
             btnExit.setDisable(false);
             btnLogin.setDisable(true);
+
+            idField.setDisable(true);
+            depositWithdrawField.setDisable(false);
         }
     }
 
