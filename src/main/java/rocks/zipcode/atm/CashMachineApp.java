@@ -6,7 +6,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.TextAlignment;
 import rocks.zipcode.atm.bank.Bank;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -15,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.text.Text;
+import javafx.scene.control.Menu;
 
 import java.util.Locale;
 
@@ -37,11 +37,16 @@ public class CashMachineApp extends Application {
     private Button btnWithdraw = new Button("Withdraw");
     private Button btnExit = new Button("Logout");
 
+    private Menu accountList = new Menu("Account Listing");
+
     private GridPane grid = new GridPane();
 
     private Parent createContent() {
         VBox vbox = new VBox(10);
         vbox.setPrefSize(500, 300);
+
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(accountList);
 
         TextArea areaInfo = new TextArea();
 
@@ -95,7 +100,7 @@ public class CashMachineApp extends Application {
         vbox.setAlignment(Pos.CENTER);
         VBox.setMargin(welcomeTitle, new Insets(5, 20, 0, 20));
         VBox.setMargin(depositAndWithdrawalPane, new Insets(0, 20, 0, 20));
-        vbox.getChildren().addAll(welcomeTitle, loginPane, depositAndWithdrawalPane, grid, btnExit);
+        vbox.getChildren().addAll(menuBar, welcomeTitle, loginPane, depositAndWithdrawalPane, grid, btnExit);
 
         return vbox;
     }
@@ -109,7 +114,7 @@ public class CashMachineApp extends Application {
                     + '\n' + "Please try again.");
             loginWarning.showAndWait();
 
-        } else if (input.getText().equals("")) {
+        } else if (false){
             loginWarning.setTitle("Login Warning");
             loginWarning.setHeaderText("You have entered an invalid login ID."
                     + '\n' + "Please try again.");
@@ -148,13 +153,13 @@ public class CashMachineApp extends Application {
         grid.add(balanceLabel, 0, 3);
 
         loginInfo.setDisable(true);
-        loginInfo.setOpacity(0.75);
+        loginInfo.setOpacity(0.65);
 
         emailInfo.setDisable(true);
-        emailInfo.setOpacity(0.75);
+        emailInfo.setOpacity(0.65);
 
         balanceInfo.setDisable(true);
-        balanceInfo.setOpacity(0.5);
+        balanceInfo.setOpacity(0.65);
 
         grid.add(loginInfo, 1, 1);
         grid.add(emailInfo, 1, 2);
