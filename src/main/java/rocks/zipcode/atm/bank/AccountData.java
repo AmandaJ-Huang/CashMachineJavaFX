@@ -36,9 +36,16 @@ public final class AccountData {
 
     @Override
     public String toString() {
-            return  "Account Id: " + id + '\n' +
+        if (balance < 0) {
+            return "Account Id: " + id + '\n' +
                     "Name: " + name + '\n' +
                     "Email: " + email + '\n' +
-                    "Balance: " + balance + '\n';
+                    "Balance: " + String.format("%,.02f", balance) + '\n' +
+                    "Your account is overdrafted.";
+        }
+        return "Account Id: " + id + '\n' +
+                "Name: " + name + '\n' +
+                "Email: " + email + '\n' +
+                "Balance: " + String.format("%,.02f", balance) + '\n';
     }
 }

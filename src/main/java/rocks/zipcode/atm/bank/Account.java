@@ -24,9 +24,11 @@ public abstract class Account {
 
     public boolean withdraw(Float amount) {
         if (canWithdraw(amount)) {
-            canDepositOrWithDraw(amount);
             updateBalance(getBalance() - amount);
             return true;
+        } else if (amount < 0) {
+            canDepositOrWithDraw(amount);
+            return false;
         } else {
             return false;
         }

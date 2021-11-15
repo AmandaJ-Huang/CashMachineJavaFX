@@ -78,4 +78,6 @@ public class CashMachine {
     public Bank getBank() {
         return this.bank;
     }
+
+    public AccountData getAccountData() { return this.accountData; }
 }

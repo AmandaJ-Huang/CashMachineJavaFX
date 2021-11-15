@@ -49,12 +49,14 @@ public class CashMachineApp extends Application {
     private GridPane welcomeTitleGrid = new GridPane();
     private Text loginInstructions = new Text("Please login (see Account Listing) or register for a new account.");
     private Text welcomeTitle = new Text("Welcome to ZipCodeBank's ATM.");
+    private Text accountDetailText = new Text("Account Detail: ");
     private FlowPane
             loginInstrPane,
             loginPane,
             loginAccountInfoDivider,
             depositWithdrawFieldPane,
             depositWithdrawBtnPane,
+            accountDetailTextPane,
             logoutBtnPane;
 
     //for formLayout GridPane
@@ -71,7 +73,8 @@ public class CashMachineApp extends Application {
 
     private Parent createContent() {
         VBox vbox = new VBox(10);
-        vbox.setPrefSize(500, 500);
+        vbox.setPrefSize(500, 450);
+        vbox.setStyle("-fx-background-color: #e3ebff");
 
         //Register form formatting
         registerFormLayout();
@@ -116,7 +119,8 @@ public class CashMachineApp extends Application {
 
         //VB - adding all elements
         vbox.getChildren().addAll(menuBar, welcomeTitleGrid, welcomeSeparator, loginInstrPane, loginPane,
-                loginAccountInfoDivider, depositWithdrawFieldPane, depositWithdrawBtnPane, areaInfo, logoutBtnPane);
+                loginAccountInfoDivider, depositWithdrawFieldPane, depositWithdrawBtnPane,
+                accountDetailTextPane, areaInfo, logoutBtnPane);
 
         return vbox;
     }
@@ -344,6 +348,11 @@ public class CashMachineApp extends Application {
         //FP - Deposit and Withdraw Buttons
         depositWithdrawBtnPane = new FlowPane(10, 0, btnDeposit, btnWithdraw);
         depositWithdrawBtnPane.setAlignment(Pos.CENTER_LEFT);
+
+        //FP - Account Detail text
+        accountDetailText.setFont(Font.font("Tahoma", FontWeight.THIN, 12));
+        accountDetailTextPane = new FlowPane(accountDetailText);
+        VBox.setMargin(accountDetailTextPane, new Insets(10, 0, 0, 15));
 
         //FP - Logout Button
         logoutBtnPane = new FlowPane(10, 0, btnExit);
