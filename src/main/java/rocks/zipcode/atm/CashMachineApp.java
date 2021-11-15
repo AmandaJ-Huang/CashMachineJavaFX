@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import rocks.zipcode.atm.bank.AccountData;
 import rocks.zipcode.atm.bank.Bank;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -53,7 +54,8 @@ public class CashMachineApp extends Application {
             loginPane,
             loginAccountInfoDivider,
             depositWithdrawFieldPane,
-            depositWithdrawBtnPane;
+            depositWithdrawBtnPane,
+            logoutBtnPane;
 
     //for formLayout GridPane
     private GridPane formGrid = new GridPane();
@@ -65,22 +67,11 @@ public class CashMachineApp extends Application {
     private RadioButton premiumAccountRadio = new RadioButton("Premium");
     private ToggleGroup accountSelectionGroup = new ToggleGroup();
 
-    //for Account Information GridPane
-    private GridPane accountInfoGrid = new GridPane();
-    private Text accountIDText = new Text("Account ID: ");
-    private Text accountTypeText = new Text("Account Type: ");
-    private Text nameText = new Text("Name: ");
-    private Text emailText = new Text("Email: ");
-    private Text balanceText = new Text("Balance: ");
-
     private TextArea areaInfo = new TextArea();
 
     private Parent createContent() {
         VBox vbox = new VBox(10);
         vbox.setPrefSize(500, 500);
-
-        //Setting up account info grid
-        accountInfoGridLayout();
 
         //Register form formatting
         registerFormLayout();
@@ -116,22 +107,16 @@ public class CashMachineApp extends Application {
         });
 
         btnExit.setOnAction(e -> {
-            cashMachine.exit();
-
-            loginIdField.clear();
-            depositWithdrawField.clear();
-            areaInfo.clear();
-            enableDisableButtons("on");
+            logoutAttempt();
         });
 
-
-        //GP - Welcome Text
         vboxLayoutAndFormatting();
+
         Separator welcomeSeparator = new Separator();
 
         //VB - adding all elements
         vbox.getChildren().addAll(menuBar, welcomeTitleGrid, welcomeSeparator, loginInstrPane, loginPane,
-                loginAccountInfoDivider, depositWithdrawFieldPane, depositWithdrawBtnPane);
+                loginAccountInfoDivider, depositWithdrawFieldPane, depositWithdrawBtnPane, areaInfo, logoutBtnPane);
 
         return vbox;
     }
@@ -216,6 +201,15 @@ public class CashMachineApp extends Application {
         }
     }
 
+    private void logoutAttempt() {
+        cashMachine.exit();
+
+        loginIdField.clear();
+        depositWithdrawField.clear();
+        areaInfo.clear();
+        enableDisableButtons("on");
+    }
+
     private void registerNewAccount() {
         Dialog dialog = new Dialog();
 
@@ -292,22 +286,6 @@ public class CashMachineApp extends Application {
         formGrid.add(newBalance, 2, 6);
     }
 
-    private void accountInfoGridLayout() {
-        accountInfoGrid.setAlignment(Pos.BOTTOM_LEFT);
-        accountInfoGrid.setHgap(10);
-        accountInfoGrid.setVgap(10);
-        accountInfoGrid.setPadding(new Insets(10, 10, 10, 10));
-
-        //accountInfoGrid layout
-        accountInfoGrid.add(accountIDText, 0, 0);
-        accountInfoGrid.add(accountTypeText, 0, 1);
-        accountInfoGrid.add(nameText, 0, 2);
-        accountInfoGrid.add(emailText, 0, 3);
-        accountInfoGrid.add(balanceText, 0, 4);
-
-        //accountInfoGrid.add();
-    }
-
     private void vboxLayoutAndFormatting() {
         /*
         FP = FlowPane
@@ -351,10 +329,12 @@ public class CashMachineApp extends Application {
         VBox.setMargin(loginPane, new Insets(5, 0, 0, 15));
 
         //FP - Divider
-        Text dividerText = new Text("DIVIDER");
+        Text dividerText = new Text("▼▽▼▽▼▽▼▽▼▽▼▽▼▽▼▽▼▽▼▽▼▽▼▽▼▽▼");
         dividerText.setFont(Font.font("Tahoma", FontWeight.EXTRA_BOLD, 25));
+        dividerText.setStyle("-fx-fill: #00d4ff");
         loginAccountInfoDivider = new FlowPane(dividerText);
-        loginAccountInfoDivider.setStyle("-fx-background-color: #000000");
+        loginAccountInfoDivider.setStyle("-fx-background-color: linear-gradient(from 0% 0% to 100% 200%, repeat, #020024 0%, #252591 44%, #00d4ff 100%)");
+        loginAccountInfoDivider.setAlignment(Pos.CENTER);
 
         //FP - Deposit and Withdraw TextField
         depositWithdrawField.setPromptText("Enter amount to deposit or withdraw.");
@@ -365,6 +345,10 @@ public class CashMachineApp extends Application {
         depositWithdrawBtnPane = new FlowPane(10, 0, btnDeposit, btnWithdraw);
         depositWithdrawBtnPane.setAlignment(Pos.CENTER_LEFT);
 
+        //FP - Logout Button
+        logoutBtnPane = new FlowPane(10, 0, btnExit);
+        logoutBtnPane.setAlignment(Pos.CENTER_RIGHT);
+        VBox.setMargin(logoutBtnPane, new Insets(0, 10, 10, 0));
     }
 
     @Override

@@ -23,11 +23,10 @@ public class Bank {
                 2000, "Example 2", "example2@gmail.com", 200
         )));
 
-        accounts.put(3000, new BasicAccount(new AccountData(
-                3000, "newAcct1", "newAcct1@gmail.com", 50
-        )));
-
+        addNewBasicAccount(3000, "Harry Potter", "boywholived@gmail.com", 319995F);
+        addNewBasicAccount(5555, "Spongebob SquarePants", "imrdy@bikinibottom.com", 1F);
         addNewPremiumAccount(1234, "Dr. Evil", "drevil@villains.com", 1000000F);
+        addNewPremiumAccount(1111, "John Wick", "daisy@gmail.com", 1111111111F);
     }
 
     public void addNewBasicAccount(int id, String name, String email, Float balance) {
@@ -48,7 +47,7 @@ public class Bank {
         if (account != null) {
             return ActionResult.success(account.getAccountData());
         } else {
-            return ActionResult.fail("No account with id: " + id + "\nTry account 1000 or 2000");
+            return ActionResult.fail("No account with id: " + id + "\nCheck Account Listing and try again.");
         }
     }
 

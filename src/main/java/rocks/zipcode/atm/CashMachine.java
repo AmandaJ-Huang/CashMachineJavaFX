@@ -1,5 +1,6 @@
 package rocks.zipcode.atm;
 
+import rocks.zipcode.atm.bank.Account;
 import rocks.zipcode.atm.bank.AccountData;
 import rocks.zipcode.atm.bank.Bank;
 
