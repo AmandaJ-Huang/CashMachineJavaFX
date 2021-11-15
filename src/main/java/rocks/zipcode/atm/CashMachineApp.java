@@ -46,10 +46,19 @@ public class CashMachineApp extends Application {
     private RadioButton premiumAccountRadio = new RadioButton("Premium");
     private ToggleGroup accountSelectionGroup = new ToggleGroup();
 
+    //for Account Information GridPane
+    private GridPane accountInfoGrid = new GridPane();
+    private Text accountIDText = new Text("Account ID: ");
+    private Text accountTypeText = new Text("Account Type: ");
+    private Text nameText = new Text("Name: ");
+    private Text emailText = new Text("Email: ");
+    private Text balanceText = new Text("Balance: ");
+
+    private TextArea areaInfo = new TextArea();
+
     private Parent createContent() {
         VBox vbox = new VBox(10);
         vbox.setPrefSize(500, 500);
-        TextArea areaInfo = new TextArea();
 
         //Register form formatting
         registerFormLayout();
@@ -62,20 +71,13 @@ public class CashMachineApp extends Application {
 
         //Button actions for Login, Deposit, Withdraw, Logout
         enableDisableButtons("on");
-        btnLogin.setOnAction(e -> {
-            Boolean accountExists = loginWarning(idField);
-            if (accountExists){
-                int id = Integer.parseInt(idField.getText());
-                cashMachine.login(id);
-                areaInfo.setText(cashMachine.toString());
-                enableDisableButtons("off");
-            }
-        });
+
+        btnLogin.setOnAction(e -> loginAttempt(idField));
 
         btnRegister.setOnAction(e -> {
             registerNewAccount();
             accountListingMenu();
-                });
+        });
 
         btnDeposit.setOnAction(e -> {
             Float amount = Float.parseFloat(depositWithdrawField.getText());
@@ -94,6 +96,8 @@ public class CashMachineApp extends Application {
         btnExit.setOnAction(e -> {
             cashMachine.exit();
 
+            idField.clear();
+            depositWithdrawField.clear();
             areaInfo.clear();
             enableDisableButtons("on");
         });
@@ -105,8 +109,6 @@ public class CashMachineApp extends Application {
 
         FlowPane depositAndWithdrawalPane = new FlowPane(10, 0, depositWithdrawField, btnDeposit, btnWithdraw);
         depositAndWithdrawalPane.setAlignment(Pos.CENTER_LEFT);
-
-        FlowPane accountDetailVertical = new FlowPane();
 
         //Formatting
         idField.setPromptText("Enter ID number.");
@@ -161,6 +163,11 @@ public class CashMachineApp extends Application {
         for(Integer account : cashMachine.listAccounts()) {
             MenuItem addAccount = new MenuItem(account.toString());
             accountMenu.getItems().add(addAccount);
+
+            addAccount.setOnAction(event -> {
+                idField.setText(account.toString());
+                loginAttempt(idField);
+            });
         }
     }
 
@@ -183,6 +190,16 @@ public class CashMachineApp extends Application {
 
             idField.setDisable(true);
             depositWithdrawField.setDisable(false);
+        }
+    }
+
+    private void loginAttempt(TextField input) {
+        Boolean accountExists = loginWarning(input);
+        if (accountExists) {
+            int id = Integer.parseInt(input.getText());
+            cashMachine.login(id);
+            areaInfo.setText(cashMachine.toString());
+            enableDisableButtons("off");
         }
     }
 
