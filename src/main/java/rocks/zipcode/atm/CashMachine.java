@@ -23,18 +23,6 @@ public class CashMachine {
         accountData = data;
     };
 
-    public Set<Integer> listAccounts() {
-        return bank.bankAccount();
-    }
-
-    public void addBasicAccount(int id, String name, String email, Float balance) {
-        bank.addNewBasicAccount(id, name, email, balance);
-    }
-
-    public void addPremiumAccount(int id, String name, String email, Float balance) {
-        bank.addNewPremiumAccount(id, name, email, balance);
-    }
-
     public void login(int id) {
         tryCall(
                 () -> bank.getAccountById(id),
@@ -84,5 +72,9 @@ public class CashMachine {
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    public Bank getBank() {
+        return this.bank;
     }
 }

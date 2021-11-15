@@ -38,7 +38,7 @@ public class Bank {
         accounts.put(id, new PremiumAccount(new AccountData(id, name, email, balance)));
     }
 
-    public Set<Integer> bankAccount() {
+    public Set<Integer> bankAccountList() {
         return accounts.keySet();
     }
 

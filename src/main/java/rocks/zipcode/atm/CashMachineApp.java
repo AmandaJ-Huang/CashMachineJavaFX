@@ -3,27 +3,35 @@ package rocks.zipcode.atm;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import rocks.zipcode.atm.bank.Bank;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.text.Text;
 import javafx.scene.control.Menu;
+
+import java.awt.*;
 
 /**
  * @author ZipCodeWilmington
  */
 public class CashMachineApp extends Application {
 
-    private TextField idField = new TextField();
+    private TextField loginIdField = new TextField();
     private TextField depositWithdrawField = new TextField();
-    private Text welcomeTitle = new Text("Welcome to ZipCodeBank's ATM.");
 
     private CashMachine cashMachine = new CashMachine(new Bank());
 
@@ -35,6 +43,17 @@ public class CashMachineApp extends Application {
 
     private Menu accountMenu = new Menu("Account Listing");
     private MenuBar menuBar = new MenuBar();
+
+    //Vbox Elements
+    private GridPane welcomeTitleGrid = new GridPane();
+    private Text loginInstructions = new Text("Please login (see Account Listing) or register for a new account.");
+    private Text welcomeTitle = new Text("Welcome to ZipCodeBank's ATM.");
+    private FlowPane
+            loginInstrPane,
+            loginPane,
+            loginAccountInfoDivider,
+            depositWithdrawFieldPane,
+            depositWithdrawBtnPane;
 
     //for formLayout GridPane
     private GridPane formGrid = new GridPane();
@@ -60,6 +79,9 @@ public class CashMachineApp extends Application {
         VBox vbox = new VBox(10);
         vbox.setPrefSize(500, 500);
 
+        //Setting up account info grid
+        accountInfoGridLayout();
+
         //Register form formatting
         registerFormLayout();
         basicAccountRadio.setToggleGroup(accountSelectionGroup);
@@ -72,7 +94,7 @@ public class CashMachineApp extends Application {
         //Button actions for Login, Deposit, Withdraw, Logout
         enableDisableButtons("on");
 
-        btnLogin.setOnAction(e -> loginAttempt(idField));
+        btnLogin.setOnAction(e -> loginAttempt(loginIdField));
 
         btnRegister.setOnAction(e -> {
             registerNewAccount();
@@ -96,29 +118,20 @@ public class CashMachineApp extends Application {
         btnExit.setOnAction(e -> {
             cashMachine.exit();
 
-            idField.clear();
+            loginIdField.clear();
             depositWithdrawField.clear();
             areaInfo.clear();
             enableDisableButtons("on");
         });
 
 
-        //FlowPanes - id, deposit, withdraw, account detail
-        FlowPane loginPane = new FlowPane(10, 0, idField, btnLogin, btnRegister);
-        loginPane.setAlignment(Pos.CENTER);
+        //GP - Welcome Text
+        vboxLayoutAndFormatting();
+        Separator welcomeSeparator = new Separator();
 
-        FlowPane depositAndWithdrawalPane = new FlowPane(10, 0, depositWithdrawField, btnDeposit, btnWithdraw);
-        depositAndWithdrawalPane.setAlignment(Pos.CENTER_LEFT);
-
-        //Formatting
-        idField.setPromptText("Enter ID number.");
-        depositWithdrawField.setPromptText("Enter amount to deposit or withdraw.");
-        welcomeTitle.setFont(Font.font("Helvetica", FontWeight.MEDIUM, 15));
-
-        //vbox.setAlignment(Pos.CENTER);
-        VBox.setMargin(welcomeTitle, new Insets(5, 20, 0, 20));
-        VBox.setMargin(depositAndWithdrawalPane, new Insets(0, 20, 0, 20));
-        vbox.getChildren().addAll(menuBar, welcomeTitle, loginPane, depositAndWithdrawalPane, areaInfo, btnExit);
+        //VB - adding all elements
+        vbox.getChildren().addAll(menuBar, welcomeTitleGrid, welcomeSeparator, loginInstrPane, loginPane,
+                loginAccountInfoDivider, depositWithdrawFieldPane, depositWithdrawBtnPane);
 
         return vbox;
     }
@@ -135,7 +148,7 @@ public class CashMachineApp extends Application {
             return false;
         }
         try{
-            for(Integer account: cashMachine.listAccounts()){
+            for(Integer account: cashMachine.getBank().bankAccountList()){
                 if (account.equals(Integer.parseInt(input.getText()))) {
                     return true;
                 }
@@ -160,13 +173,13 @@ public class CashMachineApp extends Application {
         if(!accountMenu.getItems().isEmpty()){
             accountMenu.getItems().clear();
         }
-        for(Integer account : cashMachine.listAccounts()) {
+        for(Integer account : cashMachine.getBank().bankAccountList()) {
             MenuItem addAccount = new MenuItem(account.toString());
             accountMenu.getItems().add(addAccount);
 
             addAccount.setOnAction(event -> {
-                idField.setText(account.toString());
-                loginAttempt(idField);
+                loginIdField.setText(account.toString());
+                loginAttempt(loginIdField);
             });
         }
     }
@@ -179,7 +192,7 @@ public class CashMachineApp extends Application {
             btnLogin.setDisable(false);
             btnRegister.setDisable((false));
 
-            idField.setDisable(false);
+            loginIdField.setDisable(false);
             depositWithdrawField.setDisable(true);
         } else {
             btnDeposit.setDisable(false);
@@ -188,7 +201,7 @@ public class CashMachineApp extends Application {
             btnLogin.setDisable(true);
             btnRegister.setDisable(true);
 
-            idField.setDisable(true);
+            loginIdField.setDisable(true);
             depositWithdrawField.setDisable(false);
         }
     }
@@ -222,7 +235,9 @@ public class CashMachineApp extends Application {
                 Float registeredBalance = Float.parseFloat(newBalance.getText());
 
                 if (accountSelectionGroup.getSelectedToggle().equals(basicAccountRadio)) {
-                    cashMachine.addBasicAccount(registeredLoginID, registeredName, registeredEmail, registeredBalance);
+                    cashMachine.getBank().addNewBasicAccount(registeredLoginID,
+                            registeredName, registeredEmail, registeredBalance);
+
                     newLoginID.clear();
                     newName.clear();
                     newEmail.clear();
@@ -230,7 +245,9 @@ public class CashMachineApp extends Application {
                 }
 
                 if (accountSelectionGroup.getSelectedToggle().equals(premiumAccountRadio)) {
-                    cashMachine.addPremiumAccount(registeredLoginID, registeredName, registeredEmail, registeredBalance);
+                    cashMachine.getBank().addNewPremiumAccount(registeredLoginID,
+                            registeredName, registeredEmail, registeredBalance);
+
                     newLoginID.clear();
                     newName.clear();
                     newEmail.clear();
@@ -275,10 +292,85 @@ public class CashMachineApp extends Application {
         formGrid.add(newBalance, 2, 6);
     }
 
+    private void accountInfoGridLayout() {
+        accountInfoGrid.setAlignment(Pos.BOTTOM_LEFT);
+        accountInfoGrid.setHgap(10);
+        accountInfoGrid.setVgap(10);
+        accountInfoGrid.setPadding(new Insets(10, 10, 10, 10));
+
+        //accountInfoGrid layout
+        accountInfoGrid.add(accountIDText, 0, 0);
+        accountInfoGrid.add(accountTypeText, 0, 1);
+        accountInfoGrid.add(nameText, 0, 2);
+        accountInfoGrid.add(emailText, 0, 3);
+        accountInfoGrid.add(balanceText, 0, 4);
+
+        //accountInfoGrid.add();
+    }
+
+    private void vboxLayoutAndFormatting() {
+        /*
+        FP = FlowPane
+        GP = GridPane
+        VB = VBox element
+        OT = Other element
+
+        VB Formatting:
+            > Font -- Tahoma
+            > Background Color --
+
+        VB Layout:
+            > OT -- Menu Bar
+            > GP -- Welcome Text (cosmetic, centered, bold)
+            > FP -- Login Instructions
+            > FP -- Login TextField, Login Button, Register Button (functional, centered)
+            > VB -- Divider (cosmetic, across VB width)
+            > VB -- Instructional Text (cosmetic, aligned left)
+            > FP -- Deposit/Withdraw TextField (functional, across VB width)
+            > FP -- Deposit Button, Withdraw Button (functional, aligned left)
+            > GP -- Account Detail GP (cosmetic, aligned center)
+            > FP -- Logout Button (functional, aligned right)
+
+         */
+
+        welcomeTitle.setFont(Font.font("Helvetica", FontWeight.BOLD, FontPosture.ITALIC, 20));
+
+        welcomeTitleGrid.setAlignment(Pos.CENTER);
+        welcomeTitleGrid.add(welcomeTitle, 0, 0);
+        VBox.setMargin(welcomeTitleGrid, new Insets(10, 0, 0, 0));
+
+        //FP - Login/Register Instructions
+        loginInstructions.setFont(Font.font("Tahoma", FontWeight.THIN, 12));
+        loginInstrPane = new FlowPane(loginInstructions);
+        VBox.setMargin(loginInstrPane, new Insets(10, 0, 0, 15));
+
+        //FP - Login TextField, Login and Register buttons
+        loginIdField.setPromptText("Enter ID number.");
+        loginPane = new FlowPane(10, 0, loginIdField, btnLogin, btnRegister);
+        loginPane.setAlignment(Pos.CENTER);
+        VBox.setMargin(loginPane, new Insets(5, 0, 0, 15));
+
+        //FP - Divider
+        Text dividerText = new Text("DIVIDER");
+        dividerText.setFont(Font.font("Tahoma", FontWeight.EXTRA_BOLD, 25));
+        loginAccountInfoDivider = new FlowPane(dividerText);
+        loginAccountInfoDivider.setStyle("-fx-background-color: #000000");
+
+        //FP - Deposit and Withdraw TextField
+        depositWithdrawField.setPromptText("Enter amount to deposit or withdraw.");
+        depositWithdrawField.setPrefWidth(500.0);
+        depositWithdrawFieldPane = new FlowPane(depositWithdrawField);
+
+        //FP - Deposit and Withdraw Buttons
+        depositWithdrawBtnPane = new FlowPane(10, 0, btnDeposit, btnWithdraw);
+        depositWithdrawBtnPane.setAlignment(Pos.CENTER_LEFT);
+
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         stage.setScene(new Scene(createContent()));
-        stage.setTitle("ZipCodeBank"); //sets the title of the scene
+        stage.setTitle("ZipCodeBank");
         stage.show();
     }
 
